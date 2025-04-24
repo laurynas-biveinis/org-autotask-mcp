@@ -3,6 +3,7 @@
 #+DATE: 
 
 * Org-AutoTask MCP
+[[https://github.com/laurynas-biveinis/org-autotask-mcp/actions/workflows/elisp-test.yml/badge.svg]]
 
 Model Context Protocol server for Emacs Org-based task management system.
 
