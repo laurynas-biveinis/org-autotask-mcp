@@ -19,7 +19,7 @@ jobs:
           - "30.1"
           - "29.4"
           - "28.2"
-          - "27.2"
+          # TODO: Re-add Emacs 27.2 once mcp.el is published on MELPA or ELPA
 
     permissions:
       contents: read
@@ -44,7 +44,8 @@ jobs:
                 --eval "(package-refresh-contents)" \
                 --eval "(package-install 'elisp-lint)" \
                 --eval "(package-install 'package-lint)" \
-                --eval "(package-install 'mcp)"
+                --eval "(require 'package-vc)" \
+                --eval "(package-vc-install \"https://github.com/laurynas-biveinis/mcp.el/\")"
 
       - name: elisp-lint
         run: |
