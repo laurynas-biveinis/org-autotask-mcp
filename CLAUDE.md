@@ -5,6 +5,10 @@
 - After each code change to Elisp files, run the byte compilation command to
   verify there are no compilation errors.
 - Run the Markdown linter on any edited Markdown files: `mdl filename.md`
+- Run the GitHub Actions workflow linter on any edited workflow files:
+  `actionlint filename.yml`
+- Run prettier to check and format YAML files:
+  `prettier --check filename.yml` and `prettier --write filename.yml` to fix
 
 ## Byte Compilation
 
