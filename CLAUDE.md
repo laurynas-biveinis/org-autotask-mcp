@@ -9,8 +9,8 @@
   `textlint --rule terminology filename.md`
 - Run the GitHub Actions workflow linter on any edited workflow files:
   `actionlint filename.yml`
-- Run prettier to check and format YAML files:
-  `prettier --check filename.yml` and `prettier --write filename.yml` to fix
+- Run prettier to check and format YAML and Markdown files:
+  `prettier --check filename.yml|md` and `prettier --write filename.yml|md` to fix
 
 ## Byte Compilation
 
