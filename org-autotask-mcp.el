@@ -36,11 +36,7 @@
 (defun org-autotask-mcp-list-files (request-context)
   "MCP tool handler to list available Org files.
 REQUEST-CONTEXT is the request context from the MCP server."
-  (let ((files-alist '((files . ()))))
-    (when org-autotask-mcp-files
-      (setf (alist-get 'files files-alist)
-            (mapcar (lambda (file) `((file . ,file)))
-                    org-autotask-mcp-files)))
+  (let ((files-alist (list (cons 'files (or org-autotask-mcp-files nil)))))
     (mcp-respond-with-result request-context files-alist)))
 
 ;;;###autoload
