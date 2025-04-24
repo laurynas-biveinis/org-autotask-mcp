@@ -1,0 +1,19 @@
+#+TITLE: org-autotask-mcp
+#+AUTHOR: 
+#+DATE: 
+
+* Org-AutoTask MCP
+
+Model Context Protocol server for Emacs Org-based task management system.
+
+** Overview
+
+This package provides a Model Context Protocol (MCP) server implementation for Emacs that integrates with Org mode for task management. It allows AI assistants to access and manipulate Org-mode tasks through a standard interface.
+
+** Installation
+
+/To be added/
+
+** Usage
+
+/To be added/

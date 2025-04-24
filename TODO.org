@@ -1,0 +1,23 @@
+#+TITLE: org-autotask-mcp TODO
+#+AUTHOR: Laurynas Biveinis
+#+DATE: 
+
+* Design Components
+
+** Resources to Expose
+Design the resources that will be exposed via the MCP protocol.
+- org-autotask-mcp-files: Safe subset of user agenda files
+- Project-centric organization
+- Task representation
+- Session-specific project scope
+
+** Tools to Implement
+Define the tools that will be provided for task management.
+- First tool: "list-available-org-files" to return org-autotask-mcp-files
+- Agent will use a subset of these files in subsequent requests
+
+** MCP Protocol Implementation
+Plan the implementation of the MCP server and protocol handling.
+
+** Emacs/Org-mode Integration
+Design the integration with Emacs and Org-mode functionality.
