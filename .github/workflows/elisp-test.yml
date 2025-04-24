@@ -45,7 +45,7 @@ jobs:
                 --eval "(package-install 'elisp-lint)" \
                 --eval "(package-install 'package-lint)" \
                 --eval "(require 'package-vc)" \
-                --eval "(package-vc-install \"https://github.com/laurynas-biveinis/mcp.el/\")"
+                --eval "(package-vc-install '(mcp :url \"https://github.com/laurynas-biveinis/mcp.el\"))"
 
       - name: elisp-lint
         run: |
