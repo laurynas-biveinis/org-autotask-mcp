@@ -18,8 +18,7 @@ jobs:
           - "snapshot"
           - "30.1"
           - "29.4"
-          - "28.2"
-          # TODO: Re-add Emacs 27.2 once mcp.el is published on MELPA or ELPA
+          # TODO: Re-add Emacs 28.2 and 27.2 once mcp.el is published on MELPA or ELPA
 
     permissions:
       contents: read
