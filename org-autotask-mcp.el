@@ -30,8 +30,8 @@
   :type '(repeat file)
   :group 'org-autotask-mcp)
 
-(defvar org-autotask-mcp-server nil
-  "The MCP server instance.")
+(defvar org-autotask-mcp-server-running nil
+  "Flag indicating whether the MCP server for Org tasks is running.")
 
 (defun org-autotask-mcp-list-files (request-context)
   "MCP tool handler to list available Org files.
@@ -43,24 +43,27 @@ REQUEST-CONTEXT is the request context from the MCP server."
 (defun org-autotask-mcp-start-server ()
   "Start the MCP server for Org tasks."
   (interactive)
-  (unless org-autotask-mcp-server
-    (setq org-autotask-mcp-server
-          (mcp-create-server "org-autotask"))
+  (unless org-autotask-mcp-server-running
+    ;; Start the MCP server
+    (mcp-start)
+
+    ;; Register tools
     (mcp-register-tool
-     org-autotask-mcp-server
      "list-available-org-files"
      "List available Org files for task management"
      #'org-autotask-mcp-list-files)
-    (mcp-start-server org-autotask-mcp-server)
+
+    ;; Update server status
+    (setq org-autotask-mcp-server-running t)
     (message "Org-AutoTask MCP server started")))
 
 ;;;###autoload
 (defun org-autotask-mcp-stop-server ()
   "Stop the MCP server for Org tasks."
   (interactive)
-  (when org-autotask-mcp-server
-    (mcp-stop-server org-autotask-mcp-server)
-    (setq org-autotask-mcp-server nil)
+  (when org-autotask-mcp-server-running
+    (mcp-stop)
+    (setq org-autotask-mcp-server-running nil)
     (message "Org-AutoTask MCP server stopped")))
 
 (provide 'org-autotask-mcp)

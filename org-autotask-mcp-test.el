@@ -20,8 +20,8 @@
         ;; Start the server
         (org-autotask-mcp-start-server)
 
-        ;; Verify that the server instance exists
-        (should org-autotask-mcp-server))
+        ;; Verify that the server is running
+        (should org-autotask-mcp-server-running))
 
     ;; Always stop the server after test
     (org-autotask-mcp-stop-server)))
@@ -32,31 +32,25 @@
         (result nil))
     (unwind-protect
         (progn
-          ;; Start the server on default port 8000
+          ;; Start the server
           (org-autotask-mcp-start-server)
-          (should org-autotask-mcp-server)
+          (should org-autotask-mcp-server-running)
 
-          ;; Connect as a client and make the request
-          (let* ((url-request-method "POST")
-                 (url-request-extra-headers
-                  '(("Content-Type" . "application/json")))
-                 (url-request-data
+          ;; Make a direct request using the stdio interface
+          (let* ((request
                   (json-encode
                    `((jsonrpc . "2.0")
                      (method . "mcp.server.invoke_tool")
                      (id . 1)
                      (params . ((tool_name . "list-available-org-files")
                                 (tool_input . ()))))))
-                 (url "http://localhost:8000/mcp")
-                 (response-buffer (url-retrieve-synchronously url t)))
+                 ;; Process the request directly through mcp-process-jsonrpc
+                 (response-string (mcp-process-jsonrpc request))
+                 ;; Parse the response
+                 (response-data (json-read-from-string response-string)))
 
-            (with-current-buffer response-buffer
-              (goto-char (point-min))
-              (re-search-forward "\n\n")
-              ;; Get the response as a string and convert it to JSON
-              (let ((json-string (buffer-substring-no-properties
-                                  (point) (point-max))))
-                (setq result (json-read-from-string json-string))))
+            ;; Set result for verification
+            (setq result response-data)
 
             ;; Verify response has expected structure with empty files list
             (let ((files (assoc-default 'files (assoc-default 'result result))))
