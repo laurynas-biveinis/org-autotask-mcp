@@ -2,8 +2,6 @@
 
 ## Standing Orders
 
-- After each code change to Elisp files, run the byte compilation command to
-  verify there are no compilation errors.
 - Run elisp-lint on any edited Elisp files (see the Elisp Lint section below).
 - Run the Markdown linter on any edited Markdown files: `mdl filename.md`
 - Run textlint terminology check on Markdown files:
