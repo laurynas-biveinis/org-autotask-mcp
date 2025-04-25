@@ -33,11 +33,9 @@
 (defvar org-autotask-mcp-server-running nil
   "Flag indicating whether the MCP server for Org tasks is running.")
 
-(defun org-autotask-mcp-list-files (request-context)
-  "MCP tool handler to list available Org files.
-REQUEST-CONTEXT is the request context from the MCP server."
-  (let ((files-alist (list (cons 'files (or org-autotask-mcp-files nil)))))
-    (mcp-respond-with-result request-context files-alist)))
+(defun org-autotask-mcp-list-files ()
+  "MCP tool handler to list available Org files."
+  (list (cons 'files (or org-autotask-mcp-files nil))))
 
 ;;;###autoload
 (defun org-autotask-mcp-start-server ()
