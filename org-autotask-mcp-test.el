@@ -54,12 +54,7 @@
             ;; Verify response has expected structure
             (let ((result-obj (assoc-default 'result result)))
               ;; Check content structure with expected format
-              (let ((content (assoc-default 'content result-obj)))
-                (should (vectorp content))
-                (should (= (length content) 1))
-                (let ((text-obj (aref content 0)))
-                  (should (equal (assoc-default 'type text-obj) "text"))
-                  (should (stringp (assoc-default 'text text-obj)))))
+              (org-autotask-mcp-test--verify-content-structure result-obj)
               (should (eq (assoc-default 'isError result-obj) :json-false))
               ;; Check that only these two fields exist
               (should (= (length result-obj) 2)))))
@@ -75,6 +70,15 @@
      (id . 1)
      (params . ((name . "get-org-file-content")
                 (arguments . ((file-path . ,file-path))))))))
+
+(defun org-autotask-mcp-test--verify-content-structure (result-obj)
+  "Verify the content structure in RESULT-OBJ has expected format."
+  (let ((content (assoc-default 'content result-obj)))
+    (should (vectorp content))
+    (should (= (length content) 1))
+    (let ((text-obj (aref content 0)))
+      (should (equal (assoc-default 'type text-obj) "text"))
+      (should (stringp (assoc-default 'text text-obj))))))
 
 (ert-deftest org-autotask-mcp-test-get-file-content-empty ()
   "Test get-org-file-content with empty `org-autotask-mcp-files'."
@@ -102,15 +106,11 @@
               ;; Check that isError is true for this case
               (should (eq (assoc-default 'isError result-obj) t))
               ;; Check content structure with expected error format
-              (let ((content (assoc-default 'content result-obj)))
-                (should (vectorp content))
-                (should (= (length content) 1))
-                (let ((text-obj (aref content 0)))
-                  (should (equal (assoc-default 'type text-obj) "text"))
-                  (should (stringp (assoc-default 'text text-obj)))
-                  ;; Check for the exact error message
-                  (should (equal "No org files in allowed list"
-                                 (assoc-default 'text text-obj))))))))
+              (org-autotask-mcp-test--verify-content-structure result-obj)
+              ;; Check for the exact error message
+              (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
+                (should (equal "No org files in allowed list"
+                               (assoc-default 'text text-obj)))))))
 
       ;; Clean up
       (org-autotask-mcp-stop-server))))
@@ -145,15 +145,11 @@
               ;; Check that isError is false for this case
               (should (eq (assoc-default 'isError result-obj) :json-false))
               ;; Check content structure with expected format
-              (let ((content (assoc-default 'content result-obj)))
-                (should (vectorp content))
-                (should (= (length content) 1))
-                (let ((text-obj (aref content 0)))
-                  (should (equal (assoc-default 'type text-obj) "text"))
-                  (should (stringp (assoc-default 'text text-obj)))
-                  ;; Check that the content matches what we expect
-                  (should (equal test-content
-                                 (assoc-default 'text text-obj))))))))
+              (org-autotask-mcp-test--verify-content-structure result-obj)
+              ;; Check that the content matches what we expect
+              (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
+                (should (equal test-content
+                               (assoc-default 'text text-obj)))))))
 
       ;; Clean up
       (org-autotask-mcp-stop-server)
