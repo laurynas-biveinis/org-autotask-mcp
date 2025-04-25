@@ -74,7 +74,7 @@
      (method . "tools/call")
      (id . 1)
      (params . ((name . "get-org-file-content")
-                (arguments . ((file_path . ,file-path))))))))
+                (arguments . ((file-path . ,file-path))))))))
 
 (ert-deftest org-autotask-mcp-test-get-file-content-empty ()
   "Test get-org-file-content with empty `org-autotask-mcp-files'."
@@ -97,8 +97,6 @@
             ;; Set result for verification
             (setq result response-data)
 
-            ;; Print actual response for debugging
-            (message "Response: %S" response-data)
             ;; Verify response has expected structure for error
             (let ((result-obj (assoc-default 'result result)))
               ;; Check that isError is true for this case
