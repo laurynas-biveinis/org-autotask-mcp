@@ -10,11 +10,13 @@ Design the resources that will be exposed via the MCP protocol.
 - Project-centric organization
 - Task representation
 - Session-specific project scope
+- TODO: Add path canonicalization to ensure consistent path formats for file paths
 
 ** Tools to Implement
 Define the tools that will be provided for task management.
-- First tool: "list-available-org-files" to return org-autotask-mcp-files
-- Agent will use a subset of these files in subsequent requests
+- [X] First tool: "list-available-org-files" to return org-autotask-mcp-files
+  - Agent will use a subset of these files in subsequent requests
+- [X] Second tool: "get-org-file-content" to return content of a requested org file
 
 ** MCP Protocol Implementation
 Plan the implementation of the MCP server and protocol handling.

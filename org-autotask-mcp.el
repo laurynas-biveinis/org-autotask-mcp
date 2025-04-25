@@ -39,6 +39,19 @@
       (mapconcat #'identity org-autotask-mcp-files " ")
     ""))
 
+(defun org-autotask-mcp-get-file-content (file-path)
+  "Return the content of org file at FILE-PATH if it's in the allowed list.
+Only files listed in `org-autotask-mcp-files` can be accessed."
+  (cond
+   ((null org-autotask-mcp-files)
+    (mcp-tool-throw "No org files in allowed list"))
+   ((member file-path org-autotask-mcp-files)
+    (with-temp-buffer
+      (insert-file-contents file-path)
+      (buffer-string)))
+   (t
+    (mcp-tool-throw (format "File not in allowed list: %s" file-path)))))
+
 ;;;###autoload
 (defun org-autotask-mcp-start-server ()
   "Start the MCP server for Org tasks."
@@ -52,6 +65,11 @@
      "list-available-org-files"
      "List available Org files for task management"
      #'org-autotask-mcp-list-files)
+
+    (mcp-register-tool
+     "get-org-file-content"
+     "Get the full content of an Org file"
+     #'org-autotask-mcp-get-file-content)
 
     ;; Update server status
     (setq org-autotask-mcp-server-running t)
