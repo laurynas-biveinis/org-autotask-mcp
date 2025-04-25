@@ -35,7 +35,9 @@
 
 (defun org-autotask-mcp-list-files ()
   "MCP tool handler to list available Org files."
-  (list (cons 'files (or org-autotask-mcp-files []))))
+  (if org-autotask-mcp-files
+      (mapconcat #'identity org-autotask-mcp-files " ")
+    ""))
 
 ;;;###autoload
 (defun org-autotask-mcp-start-server ()

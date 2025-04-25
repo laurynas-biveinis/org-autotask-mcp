@@ -51,9 +51,18 @@
             ;; Set result for verification
             (setq result response-data)
 
-            ;; Verify response has expected structure with empty files list
-            (let ((files (assoc-default 'files (assoc-default 'result result))))
-              (should (equal files [])))))
+            ;; Verify response has expected structure
+            (let ((result-obj (assoc-default 'result result)))
+              ;; Check content structure with expected format
+              (let ((content (assoc-default 'content result-obj)))
+                (should (vectorp content))
+                (should (= (length content) 1))
+                (let ((text-obj (aref content 0)))
+                  (should (equal (assoc-default 'type text-obj) "text"))
+                  (should (stringp (assoc-default 'text text-obj)))))
+              (should (eq (assoc-default 'isError result-obj) :json-false))
+              ;; Check that only these two fields exist
+              (should (= (length result-obj) 2)))))
 
       ;; Clean up
       (org-autotask-mcp-stop-server))))
