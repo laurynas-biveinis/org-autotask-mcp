@@ -53,7 +53,7 @@
 
             ;; Verify response has expected structure with empty files list
             (let ((files (assoc-default 'files (assoc-default 'result result))))
-              (should (equal files nil)))))
+              (should (equal files [])))))
 
       ;; Clean up
       (org-autotask-mcp-stop-server))))
