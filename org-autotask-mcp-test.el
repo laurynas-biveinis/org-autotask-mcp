@@ -36,14 +36,13 @@
           (org-autotask-mcp-start-server)
           (should org-autotask-mcp-server-running)
 
-          ;; Make a direct request using the stdio interface
           (let* ((request
                   (json-encode
                    `((jsonrpc . "2.0")
-                     (method . "mcp.server.invoke_tool")
+                     (method . "tools/call")
                      (id . 1)
-                     (params . ((tool_name . "list-available-org-files")
-                                (tool_input . ()))))))
+                     (params . ((name . "list-available-org-files")
+                                (arguments . ()))))))
                  ;; Process the request directly through mcp-process-jsonrpc
                  (response-string (mcp-process-jsonrpc request))
                  ;; Parse the response
