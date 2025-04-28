@@ -30,8 +30,8 @@
   :type '(repeat file)
   :group 'org-autotask-mcp)
 
-(defvar org-autotask-mcp-server-running nil
-  "Flag indicating whether the MCP server for Org tasks is running.")
+(defvar org-autotask-mcp-enabled nil
+  "Flag indicating whether Org-AutoTask MCP tools are enabled.")
 
 (defun org-autotask-mcp-list-files ()
   "MCP tool handler to list available Org files."
@@ -53,13 +53,10 @@ Only files listed in `org-autotask-mcp-files` can be accessed."
     (mcp-tool-throw (format "File not in allowed list: %s" file-path)))))
 
 ;;;###autoload
-(defun org-autotask-mcp-start-server ()
-  "Start the MCP server for Org tasks."
+(defun org-autotask-mcp-enable ()
+  "Enable Org-AutoTask MCP tools."
   (interactive)
-  (unless org-autotask-mcp-server-running
-    ;; Start the MCP server
-    (mcp-start)
-
+  (unless org-autotask-mcp-enabled
     ;; Register tools
     (mcp-register-tool
      "list-available-org-files"
@@ -71,18 +68,22 @@ Only files listed in `org-autotask-mcp-files` can be accessed."
      "Get the full content of an Org file"
      #'org-autotask-mcp-get-file-content)
 
-    ;; Update server status
-    (setq org-autotask-mcp-server-running t)
-    (message "Org-AutoTask MCP server started")))
+    ;; Update status
+    (setq org-autotask-mcp-enabled t)
+    (message "Org-AutoTask MCP tools enabled")))
 
 ;;;###autoload
-(defun org-autotask-mcp-stop-server ()
-  "Stop the MCP server for Org tasks."
+(defun org-autotask-mcp-disable ()
+  "Disable Org-AutoTask MCP tools."
   (interactive)
-  (when org-autotask-mcp-server-running
-    (mcp-stop)
-    (setq org-autotask-mcp-server-running nil)
-    (message "Org-AutoTask MCP server stopped")))
+  (when org-autotask-mcp-enabled
+    ;; Unregister tools
+    (mcp-unregister-tool "list-available-org-files")
+    (mcp-unregister-tool "get-org-file-content")
+
+    ;; Update status
+    (setq org-autotask-mcp-enabled nil)
+    (message "Org-AutoTask MCP tools disabled")))
 
 (provide 'org-autotask-mcp)
 ;;; org-autotask-mcp.el ends here

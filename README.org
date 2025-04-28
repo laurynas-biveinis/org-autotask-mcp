@@ -18,4 +18,10 @@ This package provides a Model Context Protocol (MCP) server implementation for E
 
 ** Usage
 
-/To be added/
+*** Setup the MCP Server
+
+To connect Claude Code to the MCP server:
+
+#+begin_src shell
+claude mcp add -t stdio emacs-org-autotask -- /path/to/emacs-mcp-stdio.sh --init-function=org-autotask-mcp-enable --stop-function=org-autotask-mcp-disable
+#+end_src

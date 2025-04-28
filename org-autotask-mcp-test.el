@@ -13,18 +13,45 @@
 (require 'mcp)
 (require 'org-autotask-mcp)
 
-(ert-deftest org-autotask-mcp-test-server-starts ()
-  "Test that the MCP server starts successfully."
+(ert-deftest org-autotask-mcp-test-enable-disable ()
+  "Test that the MCP tools are enabled and disabled successfully."
   (unwind-protect
       (progn
-        ;; Start the server
-        (org-autotask-mcp-start-server)
+        ;; Start the MCP server first
+        (mcp-start)
 
-        ;; Verify that the server is running
-        (should org-autotask-mcp-server-running))
+        ;; Enable MCP tools
+        (org-autotask-mcp-enable)
 
-    ;; Always stop the server after test
-    (org-autotask-mcp-stop-server)))
+        ;; Verify that tools are enabled
+        (should org-autotask-mcp-enabled)
+        ;; Verify tools are registered by making a call
+        (let* ((request
+                (json-encode
+                 `((jsonrpc . "2.0")
+                   (method . "tools/call")
+                   (id . 1)
+                   (params . ((name . "list-available-org-files")
+                              (arguments . ()))))))
+               ;; Process the request directly through mcp-process-jsonrpc
+               (response-string (mcp-process-jsonrpc request))
+               ;; Parse the response
+               (response-data (json-read-from-string response-string)))
+
+          ;; Verify we got a valid response (not an error about missing tool)
+          (should (assoc 'result response-data))
+          (should-not (assoc 'error response-data)))
+
+        ;; Disable tools
+        (org-autotask-mcp-disable)
+
+        ;; Verify that tools are disabled
+        (should-not org-autotask-mcp-enabled))
+    ;; Always clean up after test
+    (when (boundp 'org-autotask-mcp-enabled)
+      (when org-autotask-mcp-enabled
+        (org-autotask-mcp-disable)))
+    (mcp-stop)))
 
 (ert-deftest org-autotask-mcp-test-list-files-empty ()
   "Test list-available-org-files with empty `org-autotask-mcp-files'."
@@ -32,9 +59,9 @@
         (result nil))
     (unwind-protect
         (progn
-          ;; Start the server
-          (org-autotask-mcp-start-server)
-          (should org-autotask-mcp-server-running)
+          ;; Start the server and enable tools
+          (mcp-start)
+          (org-autotask-mcp-enable)
 
           (let* ((request
                   (json-encode
@@ -60,7 +87,8 @@
               (should (= (length result-obj) 2)))))
 
       ;; Clean up
-      (org-autotask-mcp-stop-server))))
+      (org-autotask-mcp-disable)
+      (mcp-stop))))
 
 (defun org-autotask-mcp-test--create-get-file-request (file-path)
   "Create a JSON-RPC request to get content of FILE-PATH."
@@ -86,9 +114,9 @@
         (result nil))
     (unwind-protect
         (progn
-          ;; Start the server
-          (org-autotask-mcp-start-server)
-          (should org-autotask-mcp-server-running)
+          ;; Start the server and enable tools
+          (mcp-start)
+          (org-autotask-mcp-enable)
 
           (let* ((request
                   (org-autotask-mcp-test--create-get-file-request
@@ -113,7 +141,8 @@
                                (assoc-default 'text text-obj)))))))
 
       ;; Clean up
-      (org-autotask-mcp-stop-server))))
+      (org-autotask-mcp-disable)
+      (mcp-stop))))
 
 (ert-deftest org-autotask-mcp-test-get-file-content-success ()
   "Test get-org-file-content with a file in `org-autotask-mcp-files'."
@@ -126,9 +155,9 @@
           ;; Write test content to the file
           (with-temp-file temp-file
             (insert test-content))
-          ;; Start the server
-          (org-autotask-mcp-start-server)
-          (should org-autotask-mcp-server-running)
+          ;; Start the server and enable tools
+          (mcp-start)
+          (org-autotask-mcp-enable)
 
           (let* ((request
                   (org-autotask-mcp-test--create-get-file-request temp-file))
@@ -152,7 +181,8 @@
                                (assoc-default 'text text-obj)))))))
 
       ;; Clean up
-      (org-autotask-mcp-stop-server)
+      (org-autotask-mcp-disable)
+      (mcp-stop)
       (when (file-exists-p temp-file)
         (delete-file temp-file)))))
 
