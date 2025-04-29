@@ -41,7 +41,10 @@
 
 (defun org-autotask-mcp-get-file-content (file-path)
   "Return the content of org file at FILE-PATH if it's in the allowed list.
-Only files listed in `org-autotask-mcp-files` can be accessed."
+Only files listed in `org-autotask-mcp-files` can be accessed.
+
+MCP Parameters:
+  file-path - Path to the org file to read"
   (cond
    ((null org-autotask-mcp-files)
     (mcp-tool-throw "No org files in allowed list"))
