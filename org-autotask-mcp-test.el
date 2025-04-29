@@ -13,6 +13,22 @@
 (require 'mcp)
 (require 'org-autotask-mcp)
 
+(defun org-autotask-mcp-test--create-tool-request
+    (tool-name &optional arguments)
+  "Create JSON-RPC request to call TOOL-NAME with ARGUMENTS."
+  (json-encode
+   `((jsonrpc . "2.0")
+     (method . "tools/call")
+     (id . 1)
+     (params . ((name . ,tool-name)
+                (arguments . ,(or arguments ())))))))
+
+(defun org-autotask-mcp-test--send-request (request)
+  "Send REQUEST to MCP server and return parsed response data."
+  (let* ((response-string (mcp-process-jsonrpc request))
+         (response-data (json-read-from-string response-string)))
+    response-data))
+
 (ert-deftest org-autotask-mcp-test-enable-disable ()
   "Test that the MCP tools are enabled and disabled successfully."
   (unwind-protect
@@ -26,17 +42,9 @@
         ;; Verify that tools are enabled
         (should org-autotask-mcp-enabled)
         ;; Verify tools are registered by making a call
-        (let* ((request
-                (json-encode
-                 `((jsonrpc . "2.0")
-                   (method . "tools/call")
-                   (id . 1)
-                   (params . ((name . "list-available-org-files")
-                              (arguments . ()))))))
-               ;; Process the request directly through mcp-process-jsonrpc
-               (response-string (mcp-process-jsonrpc request))
-               ;; Parse the response
-               (response-data (json-read-from-string response-string)))
+        (let* ((request (org-autotask-mcp-test--create-tool-request
+                         "list-available-org-files"))
+               (response-data (org-autotask-mcp-test--send-request request)))
 
           ;; Verify we got a valid response (not an error about missing tool)
           (should (assoc 'result response-data))
@@ -64,16 +72,9 @@
           (org-autotask-mcp-enable)
 
           (let* ((request
-                  (json-encode
-                   `((jsonrpc . "2.0")
-                     (method . "tools/call")
-                     (id . 1)
-                     (params . ((name . "list-available-org-files")
-                                (arguments . ()))))))
-                 ;; Process the request directly through mcp-process-jsonrpc
-                 (response-string (mcp-process-jsonrpc request))
-                 ;; Parse the response
-                 (response-data (json-read-from-string response-string)))
+                  (org-autotask-mcp-test--create-tool-request
+                   "list-available-org-files"))
+                 (response-data (org-autotask-mcp-test--send-request request)))
 
             ;; Set result for verification
             (setq result response-data)
@@ -92,12 +93,9 @@
 
 (defun org-autotask-mcp-test--create-get-file-request (file-path)
   "Create a JSON-RPC request to get content of FILE-PATH."
-  (json-encode
-   `((jsonrpc . "2.0")
-     (method . "tools/call")
-     (id . 1)
-     (params . ((name . "get-org-file-content")
-                (arguments . ((file-path . ,file-path))))))))
+  (org-autotask-mcp-test--create-tool-request
+   "get-org-file-content"
+   `((file-path . ,file-path))))
 
 (defun org-autotask-mcp-test--verify-content-structure (result-obj)
   "Verify the content structure in RESULT-OBJ has expected format."
@@ -121,10 +119,7 @@
           (let* ((request
                   (org-autotask-mcp-test--create-get-file-request
                    "/path/to/nonexistent.org"))
-                 ;; Process the request directly through mcp-process-jsonrpc
-                 (response-string (mcp-process-jsonrpc request))
-                 ;; Parse the response
-                 (response-data (json-read-from-string response-string)))
+                 (response-data (org-autotask-mcp-test--send-request request)))
 
             ;; Set result for verification
             (setq result response-data)
@@ -161,10 +156,7 @@
 
           (let* ((request
                   (org-autotask-mcp-test--create-get-file-request temp-file))
-                 ;; Process the request directly through mcp-process-jsonrpc
-                 (response-string (mcp-process-jsonrpc request))
-                 ;; Parse the response
-                 (response-data (json-read-from-string response-string)))
+                 (response-data (org-autotask-mcp-test--send-request request)))
 
             ;; Set result for verification
             (setq result response-data)
