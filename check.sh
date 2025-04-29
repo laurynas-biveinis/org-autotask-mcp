@@ -18,8 +18,8 @@ if ! emacs -Q --batch --eval "(progn \
   (dolist (file '(\"org-autotask-mcp.el\" \"org-autotask-mcp-test.el\")) \
     (message \"Linting %s...\" file) \
     (elisp-lint-file file)))"; then
-    echo "Elisp linting failed!"
-    EXIT_CODE=1
+	echo "Elisp linting failed!"
+	EXIT_CODE=1
 fi
 
 # Run Elisp tests
@@ -31,55 +31,64 @@ if ! emacs -Q --batch --eval "(progn \
   (require 'ert) \
   (load \"org-autotask-mcp-test.el\") \
   (ert-run-tests-batch-and-exit))"; then
-    echo "Tests failed!"
-    EXIT_CODE=1
+	echo "Tests failed!"
+	EXIT_CODE=1
 fi
 
 # Run Markdown linting
 echo "Running Markdown linter..."
 if ! mdl ./*.md; then
-    echo "Markdown linting failed!"
-    EXIT_CODE=1
+	echo "Markdown linting failed!"
+	EXIT_CODE=1
 fi
 
 # Run terminology check
 echo "Running terminology check..."
 if ! textlint --rule terminology ./*.md; then
-    echo "Terminology check failed!"
-    EXIT_CODE=1
+	echo "Terminology check failed!"
+	EXIT_CODE=1
 fi
 
 # Run prettier on Markdown files
 echo "Running prettier on Markdown files..."
 if ! prettier --check ./*.md; then
-    echo "Prettier check failed for Markdown files!"
-    EXIT_CODE=1
+	echo "Prettier check failed for Markdown files!"
+	EXIT_CODE=1
 fi
 
 # Run GitHub Actions workflow linting
 echo "Running GitHub Actions workflow linter..."
 if ! actionlint .github/workflows/*.yml; then
-    echo "GitHub Actions workflow linting failed!"
-    EXIT_CODE=1
+	echo "GitHub Actions workflow linting failed!"
+	EXIT_CODE=1
 fi
 
 # Run shellcheck on shell scripts
 echo "Running shellcheck..."
 if ! shellcheck ./*.sh; then
-    echo "Shellcheck failed!"
-    EXIT_CODE=1
+	echo "Shellcheck failed!"
+	EXIT_CODE=1
 fi
 
 # Run prettier on YAML files
 echo "Running prettier on YAML files..."
 if ! prettier --check .github/workflows/*.yml; then
-    echo "Prettier check failed for YAML files!"
-    EXIT_CODE=1
+	echo "Prettier check failed for YAML files!"
+	EXIT_CODE=1
+fi
+
+# If all checks passed, run shfmt to format shell scripts
+if [ $EXIT_CODE -eq 0 ]; then
+	echo "Running shfmt to format shell scripts..."
+	if ! shfmt -w ./*.sh; then
+		echo "shfmt failed!"
+		EXIT_CODE=1
+	fi
 fi
 
 # Final result
 if [ $EXIT_CODE -eq 0 ]; then
-    echo "OK to continue!"
+	echo "OK to continue!"
 fi
 
 exit $EXIT_CODE
