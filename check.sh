@@ -22,6 +22,9 @@ if ! emacs -Q --batch --eval "(progn \
 	EXIT_CODE=1
 fi
 
+rm org-autotask-mcp.elc
+rm org-autotask-mcp-test.elc
+
 # Run Elisp tests
 echo "Running tests..."
 if ! emacs -Q --batch --eval "(progn \
