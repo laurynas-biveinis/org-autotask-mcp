@@ -22,6 +22,10 @@
      (id . 1)
      (params . ((name . ,tool-name) (arguments . ,(or arguments ())))))))
 
+(defun org-autotask-mcp-test--create-tools-list-request ()
+  "Create JSON-RPC request to list all available tools."
+  (json-encode `((jsonrpc . "2.0") (method . "tools/list") (id . 1))))
+
 (defun org-autotask-mcp-test--send-request (request)
   "Send REQUEST to MCP server and return parsed response data."
   (let* ((response-string (mcp-process-jsonrpc request))
@@ -77,6 +81,7 @@ EXPECTED-TEXT is the text expected in the response."
 
         ;; Verify that tools are enabled
         (should org-autotask-mcp-enabled)
+
         ;; Verify tools are registered by making a call
         (let* ((request
                 (org-autotask-mcp-test--create-tool-request
@@ -86,6 +91,41 @@ EXPECTED-TEXT is the text expected in the response."
           ;; Verify we got a valid response (not an error about missing tool)
           (should (assoc 'result response-data))
           (should-not (assoc 'error response-data)))
+
+        ;; Verify the tools are registered with read-only property
+        (let* ((request (org-autotask-mcp-test--create-tools-list-request))
+               (response-data (org-autotask-mcp-test--send-request request))
+               (tools
+                (assoc-default 'tools (assoc-default 'result response-data)))
+               (list-files-tool nil)
+               (get-content-tool nil))
+
+          ;; Find our tools
+          (dotimes (i (length tools))
+            (let ((tool (aref tools i)))
+              (cond
+               ((string= (assoc-default 'name tool) "list-available-org-files")
+                (setq list-files-tool tool))
+               ((string= (assoc-default 'name tool) "get-org-file-content")
+                (setq get-content-tool tool)))))
+
+          ;; Verify tools exist
+          (should list-files-tool)
+          (should get-content-tool)
+
+          ;; Verify tools have read-only property
+          (should (assq 'readOnlyHint (assq 'annotations list-files-tool)))
+          (should
+           (eq
+            (assoc-default
+             'readOnlyHint (assoc-default 'annotations list-files-tool))
+            t))
+          (should (assq 'readOnlyHint (assq 'annotations get-content-tool)))
+          (should
+           (eq
+            (assoc-default
+             'readOnlyHint (assoc-default 'annotations get-content-tool))
+            t)))
 
         ;; Disable tools
         (org-autotask-mcp-disable)

@@ -65,13 +65,15 @@ MCP Parameters:
      #'org-autotask-mcp-list-files
      :id "list-available-org-files"
      :description "List available Org files for task management"
-     :title "List Org Files")
+     :title "List Org Files"
+     :read-only t)
 
     (mcp-register-tool
      #'org-autotask-mcp-get-file-content
      :id "get-org-file-content"
      :description "Get the full content of an Org file"
-     :title "Get Org File Content")
+     :title "Get Org File Content"
+     :read-only t)
 
     ;; Update status
     (setq org-autotask-mcp-enabled t)
