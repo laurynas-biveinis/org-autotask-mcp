@@ -85,11 +85,54 @@
               (org-autotask-mcp-test--verify-content-structure result-obj)
               (should (eq (assoc-default 'isError result-obj) :json-false))
               ;; Check that only these two fields exist
-              (should (= (length result-obj) 2)))))
+              (should (= (length result-obj) 2))
+              ;; Check empty response
+              (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
+                (should (equal "" (assoc-default 'text text-obj)))))))
 
       ;; Clean up
       (org-autotask-mcp-disable)
       (mcp-stop))))
+
+(ert-deftest org-autotask-mcp-test-list-files-non-empty ()
+  "Test list-available-org-files with non-empty `org-autotask-mcp-files'."
+  (let* ((temp-file1 (make-temp-file "org-test1" nil ".org"))
+         (temp-file2 (make-temp-file "org-test2" nil ".org"))
+         (org-autotask-mcp-files (list temp-file1 temp-file2))
+         (result nil))
+    (unwind-protect
+        (progn
+          ;; Start the server and enable tools
+          (mcp-start)
+          (org-autotask-mcp-enable)
+
+          (let* ((request
+                  (org-autotask-mcp-test--create-tool-request
+                   "list-available-org-files"))
+                 (response-data (org-autotask-mcp-test--send-request request)))
+
+            ;; Set result for verification
+            (setq result response-data)
+
+            ;; Verify response has expected structure
+            (let ((result-obj (assoc-default 'result result)))
+              ;; Check content structure with expected format
+              (org-autotask-mcp-test--verify-content-structure result-obj)
+              (should (eq (assoc-default 'isError result-obj) :json-false))
+              ;; Check for expected file list content
+              (let ((text-obj (aref (assoc-default 'content result-obj) 0))
+                    (expected-text
+                     (mapconcat #'identity org-autotask-mcp-files " ")))
+                (should
+                 (equal expected-text (assoc-default 'text text-obj)))))))
+
+      ;; Clean up
+      (org-autotask-mcp-disable)
+      (mcp-stop)
+      (when (file-exists-p temp-file1)
+        (delete-file temp-file1))
+      (when (file-exists-p temp-file2)
+        (delete-file temp-file2)))))
 
 (defun org-autotask-mcp-test--create-get-file-request (file-path)
   "Create a JSON-RPC request to get content of FILE-PATH."
