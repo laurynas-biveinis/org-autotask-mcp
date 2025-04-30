@@ -2,6 +2,40 @@
 
 EXIT_CODE=0
 
+# Check Elisp syntax via byte compilation
+echo "Checking Elisp syntax via byte compilation..."
+if ! emacs -Q --batch \
+	--eval "(setq byte-compile-warnings nil)" \
+	--eval "(add-to-list 'load-path \".\")" \
+	--eval "(add-to-list 'load-path (expand-file-name \"~/.emacs.d/elpa/mcp/\"))" \
+	--eval "(dolist (file '(\"org-autotask-mcp.el\" \"org-autotask-mcp-test.el\"))
+      (message \"Checking syntax of %s...\" file)
+      (if (not (byte-compile-file file))
+          (kill-emacs 1)))"; then
+	echo "Elisp byte compilation check failed"
+	EXIT_CODE=1
+fi
+
+# Format Elisp files using elisp-autofmt
+if [ $EXIT_CODE -eq 0 ]; then
+	echo "Running elisp-autofmt on Elisp files..."
+	if ! emacs -Q --batch --eval "(let ((pkg-dirs (list (locate-user-emacs-file \"elpa/elisp-autofmt-20250421.1112\")
+                                          (expand-file-name \".\"))))
+                         (dolist (dir pkg-dirs)
+                           (add-to-list 'load-path dir))
+                         (require 'elisp-autofmt)
+                         (dolist (file '(\"org-autotask-mcp.el\" \"org-autotask-mcp-test.el\"))
+                           (message \"Formatting %s...\" file)
+                           (find-file file)
+                           (elisp-autofmt-buffer-to-file)
+                           (message \"Formatted %s\" file)))"; then
+		echo "elisp-autofmt failed"
+		EXIT_CODE=1
+	fi
+else
+	echo "Skipping formatting due to syntax errors"
+fi
+
 # Run elisp-lint on Emacs Lisp files
 echo "Running elisp-lint..."
 if ! emacs -Q --batch --eval "(progn \

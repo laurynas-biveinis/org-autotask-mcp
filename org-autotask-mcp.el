@@ -62,14 +62,16 @@ MCP Parameters:
   (unless org-autotask-mcp-enabled
     ;; Register tools
     (mcp-register-tool
-     "list-available-org-files"
-     "List available Org files for task management"
-     #'org-autotask-mcp-list-files)
+     #'org-autotask-mcp-list-files
+     :id "list-available-org-files"
+     :description "List available Org files for task management"
+     :title "List Org Files")
 
     (mcp-register-tool
-     "get-org-file-content"
-     "Get the full content of an Org file"
-     #'org-autotask-mcp-get-file-content)
+     #'org-autotask-mcp-get-file-content
+     :id "get-org-file-content"
+     :description "Get the full content of an Org file"
+     :title "Get Org File Content")
 
     ;; Update status
     (setq org-autotask-mcp-enabled t)

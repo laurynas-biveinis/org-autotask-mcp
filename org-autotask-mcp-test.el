@@ -20,8 +20,7 @@
    `((jsonrpc . "2.0")
      (method . "tools/call")
      (id . 1)
-     (params . ((name . ,tool-name)
-                (arguments . ,(or arguments ())))))))
+     (params . ((name . ,tool-name) (arguments . ,(or arguments ())))))))
 
 (defun org-autotask-mcp-test--send-request (request)
   "Send REQUEST to MCP server and return parsed response data."
@@ -42,8 +41,9 @@
         ;; Verify that tools are enabled
         (should org-autotask-mcp-enabled)
         ;; Verify tools are registered by making a call
-        (let* ((request (org-autotask-mcp-test--create-tool-request
-                         "list-available-org-files"))
+        (let* ((request
+                (org-autotask-mcp-test--create-tool-request
+                 "list-available-org-files"))
                (response-data (org-autotask-mcp-test--send-request request)))
 
           ;; Verify we got a valid response (not an error about missing tool)
@@ -93,9 +93,8 @@
 
 (defun org-autotask-mcp-test--create-get-file-request (file-path)
   "Create a JSON-RPC request to get content of FILE-PATH."
-  (org-autotask-mcp-test--create-tool-request
-   "get-org-file-content"
-   `((file-path . ,file-path))))
+  (org-autotask-mcp-test--create-tool-request "get-org-file-content"
+                                              `((file-path . ,file-path))))
 
 (defun org-autotask-mcp-test--verify-content-structure (result-obj)
   "Verify the content structure in RESULT-OBJ has expected format."
@@ -132,8 +131,10 @@
               (org-autotask-mcp-test--verify-content-structure result-obj)
               ;; Check for the exact error message
               (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
-                (should (equal "No org files in allowed list"
-                               (assoc-default 'text text-obj)))))))
+                (should
+                 (equal
+                  "No org files in allowed list"
+                  (assoc-default 'text text-obj)))))))
 
       ;; Clean up
       (org-autotask-mcp-disable)
@@ -169,8 +170,7 @@
               (org-autotask-mcp-test--verify-content-structure result-obj)
               ;; Check that the content matches what we expect
               (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
-                (should (equal test-content
-                               (assoc-default 'text text-obj)))))))
+                (should (equal test-content (assoc-default 'text text-obj)))))))
 
       ;; Clean up
       (org-autotask-mcp-disable)
