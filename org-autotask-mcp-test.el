@@ -28,6 +28,43 @@
          (response-data (json-read-from-string response-string)))
     response-data))
 
+(defun org-autotask-mcp-test--setup-and-run-list-files-test
+    (files expected-text)
+  "Setup and run test for list-files with FILES and verify EXPECTED-TEXT.
+FILES should be the value of `org-autotask-mcp-files' to use for the test.
+EXPECTED-TEXT is the text expected in the response."
+  (let ((org-autotask-mcp-files files)
+        (result nil))
+    (unwind-protect
+        (progn
+          ;; Start the server and enable tools
+          (mcp-start)
+          (org-autotask-mcp-enable)
+
+          (let* ((request
+                  (org-autotask-mcp-test--create-tool-request
+                   "list-available-org-files"))
+                 (response-data (org-autotask-mcp-test--send-request request)))
+
+            ;; Set result for verification
+            (setq result response-data)
+
+            ;; Verify response has expected structure
+            (let ((result-obj (assoc-default 'result result)))
+              ;; Check content structure with expected format
+              (org-autotask-mcp-test--verify-content-structure result-obj)
+              (should (eq (assoc-default 'isError result-obj) :json-false))
+              ;; Check that only these two fields exist
+              (should (= (length result-obj) 2))
+              ;; Check for expected text
+              (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
+                (should
+                 (equal expected-text (assoc-default 'text text-obj)))))))
+
+      ;; Clean up
+      (org-autotask-mcp-disable)
+      (mcp-stop))))
+
 (ert-deftest org-autotask-mcp-test-enable-disable ()
   "Test that the MCP tools are enabled and disabled successfully."
   (unwind-protect
@@ -63,72 +100,18 @@
 
 (ert-deftest org-autotask-mcp-test-list-files-empty ()
   "Test list-available-org-files with empty `org-autotask-mcp-files'."
-  (let ((org-autotask-mcp-files nil)
-        (result nil))
-    (unwind-protect
-        (progn
-          ;; Start the server and enable tools
-          (mcp-start)
-          (org-autotask-mcp-enable)
-
-          (let* ((request
-                  (org-autotask-mcp-test--create-tool-request
-                   "list-available-org-files"))
-                 (response-data (org-autotask-mcp-test--send-request request)))
-
-            ;; Set result for verification
-            (setq result response-data)
-
-            ;; Verify response has expected structure
-            (let ((result-obj (assoc-default 'result result)))
-              ;; Check content structure with expected format
-              (org-autotask-mcp-test--verify-content-structure result-obj)
-              (should (eq (assoc-default 'isError result-obj) :json-false))
-              ;; Check that only these two fields exist
-              (should (= (length result-obj) 2))
-              ;; Check empty response
-              (let ((text-obj (aref (assoc-default 'content result-obj) 0)))
-                (should (equal "" (assoc-default 'text text-obj)))))))
-
-      ;; Clean up
-      (org-autotask-mcp-disable)
-      (mcp-stop))))
+  (org-autotask-mcp-test--setup-and-run-list-files-test nil ""))
 
 (ert-deftest org-autotask-mcp-test-list-files-non-empty ()
   "Test list-available-org-files with non-empty `org-autotask-mcp-files'."
   (let* ((temp-file1 (make-temp-file "org-test1" nil ".org"))
          (temp-file2 (make-temp-file "org-test2" nil ".org"))
-         (org-autotask-mcp-files (list temp-file1 temp-file2))
-         (result nil))
+         (files-list (list temp-file1 temp-file2))
+         (expected-text (mapconcat #'identity files-list " ")))
     (unwind-protect
-        (progn
-          ;; Start the server and enable tools
-          (mcp-start)
-          (org-autotask-mcp-enable)
-
-          (let* ((request
-                  (org-autotask-mcp-test--create-tool-request
-                   "list-available-org-files"))
-                 (response-data (org-autotask-mcp-test--send-request request)))
-
-            ;; Set result for verification
-            (setq result response-data)
-
-            ;; Verify response has expected structure
-            (let ((result-obj (assoc-default 'result result)))
-              ;; Check content structure with expected format
-              (org-autotask-mcp-test--verify-content-structure result-obj)
-              (should (eq (assoc-default 'isError result-obj) :json-false))
-              ;; Check for expected file list content
-              (let ((text-obj (aref (assoc-default 'content result-obj) 0))
-                    (expected-text
-                     (mapconcat #'identity org-autotask-mcp-files " ")))
-                (should
-                 (equal expected-text (assoc-default 'text text-obj)))))))
-
-      ;; Clean up
-      (org-autotask-mcp-disable)
-      (mcp-stop)
+        (org-autotask-mcp-test--setup-and-run-list-files-test
+         files-list expected-text)
+      ;; Clean up temp files
       (when (file-exists-p temp-file1)
         (delete-file temp-file1))
       (when (file-exists-p temp-file2)
