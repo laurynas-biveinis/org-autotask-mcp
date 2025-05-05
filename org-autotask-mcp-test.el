@@ -22,9 +22,6 @@
      (id . 1)
      (params . ((name . ,tool-name) (arguments . ,(or arguments ())))))))
 
-(defun org-autotask-mcp-test--create-tools-list-request ()
-  "Create JSON-RPC request to list all available tools."
-  (json-encode `((jsonrpc . "2.0") (method . "tools/list") (id . 1))))
 
 (defun org-autotask-mcp-test--send-request (request)
   "Send REQUEST to MCP server and return parsed response data."
@@ -93,7 +90,7 @@ EXPECTED-TEXT is the text expected in the response."
           (should-not (assoc 'error response-data)))
 
         ;; Verify the tools are registered with read-only property
-        (let* ((request (org-autotask-mcp-test--create-tools-list-request))
+        (let* ((request (mcp-create-tools-list-request))
                (response-data (org-autotask-mcp-test--send-request request))
                (tools
                 (assoc-default 'tools (assoc-default 'result response-data)))
