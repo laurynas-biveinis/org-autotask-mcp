@@ -13,15 +13,6 @@
 (require 'mcp)
 (require 'org-autotask-mcp)
 
-(defun org-autotask-mcp-test--create-tool-request
-    (tool-name &optional arguments)
-  "Create JSON-RPC request to call TOOL-NAME with ARGUMENTS."
-  (json-encode
-   `((jsonrpc . "2.0")
-     (method . "tools/call")
-     (id . 1)
-     (params . ((name . ,tool-name) (arguments . ,(or arguments ())))))))
-
 
 (defun org-autotask-mcp-test--send-request (request)
   "Send REQUEST to MCP server and return parsed response data."
@@ -43,8 +34,7 @@ EXPECTED-TEXT is the text expected in the response."
           (org-autotask-mcp-enable)
 
           (let* ((request
-                  (org-autotask-mcp-test--create-tool-request
-                   "list-available-org-files"))
+                  (mcp-create-tools-call-request "list-available-org-files"))
                  (response-data (org-autotask-mcp-test--send-request request)))
 
             ;; Set result for verification
@@ -81,8 +71,7 @@ EXPECTED-TEXT is the text expected in the response."
 
         ;; Verify tools are registered by making a call
         (let* ((request
-                (org-autotask-mcp-test--create-tool-request
-                 "list-available-org-files"))
+                (mcp-create-tools-call-request "list-available-org-files"))
                (response-data (org-autotask-mcp-test--send-request request)))
 
           ;; Verify we got a valid response (not an error about missing tool)
@@ -156,8 +145,8 @@ EXPECTED-TEXT is the text expected in the response."
 
 (defun org-autotask-mcp-test--create-get-file-request (file-path)
   "Create a JSON-RPC request to get content of FILE-PATH."
-  (org-autotask-mcp-test--create-tool-request "get-org-file-content"
-                                              `((file-path . ,file-path))))
+  (mcp-create-tools-call-request
+   "get-org-file-content" 1 `((file-path . ,file-path))))
 
 (defun org-autotask-mcp-test--verify-content-structure (result-obj)
   "Verify the content structure in RESULT-OBJ has expected format."
